@@ -1,11 +1,9 @@
-// GameOfLife.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
+#include "Timing.h"
 
 using namespace std;
 
@@ -22,7 +20,7 @@ vector<vector<char>> loadBoard(string fileName)
 
 	if (inFile.fail())
 	{
-		cout << "Unable to open or find file";
+		cout << "\n--> Unable to open or find file!";
 		return board;
 	}
 
@@ -57,6 +55,7 @@ vector<vector<char>> loadBoard(string fileName)
 	cout << "\n";
 
 	// print board
+	cout << "\nInput:\n";
 	for (int i = 0; i < rowSize; i++)
 	{
 		cout << i << ": ";
@@ -66,8 +65,10 @@ vector<vector<char>> loadBoard(string fileName)
 		}
 		cout << "\n";
 	}
-
 	inFile.close();
+
+	cout << "Board loaded successfully!\n";
+
 
 	return board;
 }
@@ -81,7 +82,7 @@ void saveBoard(string fileName, vector<vector<char>> board)
 	outFile.open(fileName, ios::out);
 
 	if (!outFile) {
-		cout << "File not created!";
+		cout << "\n--> File not created!";
 	}
 	else {
 
@@ -97,16 +98,27 @@ void saveBoard(string fileName, vector<vector<char>> board)
 			}
 			outFile << endl;
 		}
-
-		cout << "File created successfully!";
 		outFile.close();
+
+		// print board
+		cout << "\nOutput:\n";
+		for (int i = 0; i < board.size(); i++)
+		{
+			cout << i << ": ";
+			for (int j = 0; j < board[0].size(); j++)
+			{
+				cout << board[i][j];
+			}
+			cout << "\n";
+		}
+		cout << "Board saved successfully!\n";
 	}
 
 }
 
 int aliveNeighborSquare(int row, int col, vector<vector<char>> board)
 {
-	// conut of alive neighbors
+	// count of alive neighbors
 	int count = 0;
 
 	// pattern
@@ -156,18 +168,23 @@ vector<vector<char>> gol(vector<vector<char>> board, int generations)
 
 				if (aliveNeighbors == 2 || aliveNeighbors == 3) newBoard[i][j] = 'x';
 				else newBoard[i][j] = '.';
-				cout << newBoard[i][j];
+				//cout << newBoard[i][j];
 			}
-			cout << "\n";
+			//cout << "\n";
 		}
-		cout << "\n";
+		//cout << "\n";
 		board = newBoard;
 	}
 	return newBoard;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
+	// Get Singleton instance
+	Timing* timing = Timing::getInstance();
+	// Start recording the setup time
+	timing->startSetup();
+
 	string loadFileName;
 	string saveFileName;
 	int generations = 1;
@@ -175,6 +192,7 @@ int main(int argc, char** argv)
 	int counter;
 	vector<vector<char>> board;
 
+	// Handle command line parameters
 	if (argc == 1)
 		cout << "\nNo Extra Command Line Argument Passed Other Than Program Name";
 	if (argc >= 2)
@@ -205,16 +223,46 @@ int main(int argc, char** argv)
 	}
 
 	if (loadFileName.empty())
+	{
 		cout << "no filename given to load";
+		return EXIT_SUCCESS;
+	}
 
 	if (saveFileName.empty())
+	{
 		cout << "no filename given to save";
+		return EXIT_SUCCESS;
+	}
 
-	if (!loadFileName.empty())
-		board = loadBoard(loadFileName);
-		board = gol(board, generations);
-		saveBoard(saveFileName, board);
+	// Load board
+	board = loadBoard(loadFileName);
+	if (board.empty()) return EXIT_SUCCESS;
+
+	// Stop recording the setup time
+	timing->stopSetup();
+
+	// Start recording the Calculation time
+	timing->startComputation();
+
+	// Calculate new board after n generations
+	board = gol(board, generations);
+
+	// Stop recording the Calculation time
+	timing->stopComputation();
+
+	// Start recording the Finalization time
+	timing->startFinalization();
+
+	// Save new board to file
+	saveBoard(saveFileName, board);
 	
+	// Stop recording the Finalization time
+	timing->stopFinalization();
+
+	// Save and output this string
+	string output = timing->getResults();
+	cout << "\nSetup time | Calculation time | Finalization time";
+	cout << "\n" << output << "\n";
 
 	return EXIT_SUCCESS;
 }
