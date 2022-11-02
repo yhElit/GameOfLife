@@ -30,11 +30,11 @@ vector<vector<char>> loadBoard(string fileName)
 	// used for breaking words
 	stringstream s(line);
 
-	// row size
+	// column size
 	getline(s, word, ',');
 	columnSize = stof(word);
 
-	// column size
+	// row size
 	getline(s, word);
 	rowSize = stof(word);
 
@@ -67,8 +67,7 @@ vector<vector<char>> loadBoard(string fileName)
 	}
 	inFile.close();
 
-	cout << "Board loaded successfully!\n";
-
+	cout << "--> Board loaded successfully!\n";
 
 	return board;
 }
@@ -101,7 +100,7 @@ void saveBoard(string fileName, vector<vector<char>> board)
 		outFile.close();
 
 		// print board
-		cout << "\nOutput:\n";
+		cout << " Output:\n";
 		for (int i = 0; i < board.size(); i++)
 		{
 			cout << i << ": ";
@@ -111,7 +110,7 @@ void saveBoard(string fileName, vector<vector<char>> board)
 			}
 			cout << "\n";
 		}
-		cout << "Board saved successfully!\n";
+		cout << "--> Board saved successfully!\n";
 	}
 
 }
@@ -127,38 +126,38 @@ int aliveNeighborSquare(int row, int col, vector<vector<char>> board)
 	// 6 7 8
 
 	// 4
-	if (col - 1 >= 0 && board[row][col - 1] == 'x') { count++;  }
+	if (col - 1 >= 0 && board[row][col - 1] == 'x') { count++; }
+
 	// 9
-	if (col + 1 < board[0].size() && board[row][col + 1] == 'x') { count++;  }
+	if (col + 1 < board[0].size() && board[row][col + 1] == 'x') { count++; }
 
 	if (row - 1 > 0)
 	{
 		// 2
-		if (board[row - 1][col] == 'x') { count++;  }
+		if (board[row - 1][col] == 'x') { count++; }
 		// 1
-		if (col - 1 >= 0 && board[row - 1][col - 1] == 'x') { count++;  }
+		if (col - 1 >= 0 && board[row - 1][col - 1] == 'x') { count++; }
 		// 3
-		if (col + 1 < board[0].size() && board[row - 1][col + 1] == 'x') { count++;  }
+		if (col + 1 < board[0].size() && board[row - 1][col + 1] == 'x') { count++; }
 	}
 
 	if (row + 1 < board.size())
 	{
 		// 7
-		if (board[row + 1][col] == 'x') { count++;  }
+		if (board[row + 1][col] == 'x') { count++; }
 		// 6
 		if (col - 1 >= 0 && board[row + 1][col - 1] == 'x') { count++; }
 		// 8
-		if (col + 1 < board[0].size() && board[row + 1][col + 1] == 'x') { count++;  }
+		if (col + 1 < board[0].size() && board[row + 1][col + 1] == 'x') { count++; }
 	}
-
 	return count;
 }
 
 vector<vector<char>> gol(vector<vector<char>> board, int generations)
 {
-	vector<vector<char>> newBoard = board;
+	vector<vector<char>> nextBoard = board;
 
-	for( int i = 0; i < generations; i++)
+	for( int g = 0; g < generations; g++)
 	{
 		for (int i = 0; i < board.size(); i++)
 		{
@@ -166,16 +165,21 @@ vector<vector<char>> gol(vector<vector<char>> board, int generations)
 			{
 				int aliveNeighbors = aliveNeighborSquare(i, j, board);
 
-				if (aliveNeighbors == 2 || aliveNeighbors == 3) newBoard[i][j] = 'x';
-				else newBoard[i][j] = '.';
-				//cout << newBoard[i][j];
+				// Rule 1
+				if (board[i][j] == '.' && aliveNeighbors == 3) { nextBoard[i][j] = 'x';}
+
+				// Rule 2
+				if ((board[i][j] == 'x' && aliveNeighbors == 2) || (board[i][j] == 'x' && aliveNeighbors == 3)) { nextBoard[i][j] = 'x'; }
+
+				// Rule 3 & 4
+				if ((board[i][j] == 'x' && aliveNeighbors < 2) || (board[i][j] == 'x' && aliveNeighbors > 3)) { nextBoard[i][j] = '.'; }
 			}
-			//cout << "\n";
 		}
 		//cout << "\n";
-		board = newBoard;
+		//cout << "Generation " << g << ":\n";
+		board = nextBoard;
 	}
-	return newBoard;
+	return board;
 }
 
 int main(int argc, char *argv[])
@@ -252,6 +256,8 @@ int main(int argc, char *argv[])
 
 	// Start recording the Finalization time
 	timing->startFinalization();
+
+	cout << "\nGeneration " << generations;
 
 	// Save new board to file
 	saveBoard(saveFileName, board);
