@@ -36,4 +36,4 @@ cell
 
 **Program call example**
 
- gol --load board5x5_test1_in.gol --save board5x5_out.gol --generations 1 --measure
+ gol --load random250_in.gol --save random250_out.gol --generations 250 --measure
