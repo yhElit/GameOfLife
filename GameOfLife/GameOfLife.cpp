@@ -55,7 +55,7 @@ vector<vector<char>> loadBoard(string fileName)
 	cout << "\n";
 
 	// print board
-	cout << "\nInput:\n";
+	/*cout << "\nInput:\n";
 	for (int i = 0; i < rowSize; i++)
 	{
 		cout << i << ": ";
@@ -65,6 +65,7 @@ vector<vector<char>> loadBoard(string fileName)
 		}
 		cout << "\n";
 	}
+	*/
 	inFile.close();
 
 	cout << "--> Board loaded successfully!\n";
@@ -100,7 +101,7 @@ void saveBoard(string fileName, vector<vector<char>> board)
 		outFile.close();
 
 		// print board
-		cout << " Output:\n";
+		/*cout << " Output:\n";
 		for (int i = 0; i < board.size(); i++)
 		{
 			cout << i << ": ";
@@ -109,74 +110,301 @@ void saveBoard(string fileName, vector<vector<char>> board)
 				cout << board[i][j];
 			}
 			cout << "\n";
-		}
+		}*/
 		cout << "--> Board saved successfully!\n";
 	}
 
 }
 
-int aliveNeighborSquare(int row, int col, vector<vector<char>> board)
-{
-	// count of alive neighbors
-	int count = 0;
-
-	// pattern
-	// 1 2 3
-	// 4 X 9
-	// 6 7 8
-
-	// 4
-	if (col - 1 >= 0 && board[row][col - 1] == 'x') { count++; }
-
-	// 9
-	if (col + 1 < board[0].size() && board[row][col + 1] == 'x') { count++; }
-
-	if (row - 1 > 0)
-	{
-		// 2
-		if (board[row - 1][col] == 'x') { count++; }
-		// 1
-		if (col - 1 >= 0 && board[row - 1][col - 1] == 'x') { count++; }
-		// 3
-		if (col + 1 < board[0].size() && board[row - 1][col + 1] == 'x') { count++; }
-	}
-
-	if (row + 1 < board.size())
-	{
-		// 7
-		if (board[row + 1][col] == 'x') { count++; }
-		// 6
-		if (col - 1 >= 0 && board[row + 1][col - 1] == 'x') { count++; }
-		// 8
-		if (col + 1 < board[0].size() && board[row + 1][col + 1] == 'x') { count++; }
-	}
-	return count;
-}
-
 vector<vector<char>> gol(vector<vector<char>> board, int generations)
 {
 	vector<vector<char>> nextBoard = board;
+	int aliveNeighbors = 0;
+	int colSize = board[0].size();
 
-	for( int g = 0; g < generations; g++)
+	for( int g = 1; g <= generations; g++)
 	{
-		for (int i = 0; i < board.size(); i++)
-		{
-			for (int j = 0; j < board[0].size(); j++)
-			{
-				int aliveNeighbors = aliveNeighborSquare(i, j, board);
-
-				// Rule 1
-				if (board[i][j] == '.' && aliveNeighbors == 3) { nextBoard[i][j] = 'x';}
-
-				// Rule 2
-				if ((board[i][j] == 'x' && aliveNeighbors == 2) || (board[i][j] == 'x' && aliveNeighbors == 3)) { nextBoard[i][j] = 'x'; }
-
-				// Rule 3 & 4
-				if ((board[i][j] == 'x' && aliveNeighbors < 2) || (board[i][j] == 'x' && aliveNeighbors > 3)) { nextBoard[i][j] = '.'; }
-			}
-		}
 		//cout << "\n";
 		//cout << "Generation " << g << ":\n";
+
+		for (int row = 0; row < board.size(); row++)
+		{
+			for (int col = 0; col < colSize; col++)
+			{
+
+				// count of alive neighbors
+				aliveNeighbors = 0;
+
+				// pattern
+				// 1 2 3
+				// 4 X 9
+				// 6 7 8
+
+				// case for cell "X" is not on the border & corners (no wrap around needed)
+				if (row > 0 && row < board.size() - 1 && col > 0 && col < colSize - 1)
+				{
+					// 1 
+					if (board[row - 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 2
+					if (board[row - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3
+					if (board[row - 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 4
+					if (board[row][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 6
+					if (board[row + 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 7
+					if (board[row + 1][col] == 'x') { aliveNeighbors++; }
+
+					// 8
+					if (board[row + 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 9
+					if (board[row][col + 1] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the top row but not in the top corners
+				else if (row == 0 && col > 0 && col < colSize - 1)
+				{	
+					// 1 wrap around
+					if (board[board.size() - 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 2 wrap around
+					if (board[board.size() - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3 wrap around
+					if (board[board.size() - 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 4
+					if (board[row][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 6
+					if (board[row + 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 7
+					if (board[row + 1][col] == 'x') { aliveNeighbors++; }
+
+					// 8
+					if (board[row + 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 9
+					if (board[row][col + 1] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the bottom row but not in the bottom corners
+				else if (row == board.size() - 1 && col > 0 && col < colSize - 1)
+				{
+					// 1 
+					if (board[row - 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 2
+					if (board[row - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3
+					if (board[row - 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 4
+					if (board[row][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 6 wrap around
+					if (board[0][col] == 'x') { aliveNeighbors++; }
+
+					// 7 wrap around
+					if (board[0][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 8 wrap around
+					if (board[0][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 9 
+					if (board[row][col + 1] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the left side but not in the corners
+				else if (col == 0 && row > 0 && row < board.size() - 1)
+				{
+					// 1 wrap around
+					if (board[row - 1][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 2
+					if (board[row - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3
+					if (board[row - 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 4 wrap around
+					if (board[row][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 6 wrap around
+					if (board[row + 1][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 7
+					if (board[row + 1][col] == 'x') { aliveNeighbors++; }
+
+					// 8
+					if (board[row + 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 9
+					if (board[row][col + 1] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the right side but not in the corners
+				else if (col == colSize - 1 && row > 0 && row < board.size() - 1)
+				{
+					// 1 
+					if (board[row - 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 2
+					if (board[row - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3 wrap around
+					if (board[row - 1][0] == 'x') { aliveNeighbors++; }
+
+					// 4
+					if (board[row][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 6
+					if (board[row + 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 7
+					if (board[row + 1][col] == 'x') { aliveNeighbors++; }
+
+					// 8 wrap around
+					if (board[row + 1][0] == 'x') { aliveNeighbors++; }
+
+					// 9 wrap around
+					if (board[row][0] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the left top corner
+				else if (row == 0 && col == 0)
+				{
+					// 1 wrap around
+					if (board[board.size() - 1][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 2 wrap around
+					if (board[board.size() - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3 wrap around
+					if (board[board.size() - 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 4 wrap around
+					if (board[0][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 9 
+					if (board[0][1] == 'x') { aliveNeighbors++; }
+
+					// 6 wrap around
+					if (board[1][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 7
+					if (board[1][0] == 'x') { aliveNeighbors++; }
+
+					// 8
+					if (board[1][1] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the right top corner
+				else if (row == 0 && col == colSize - 1)
+				{
+					// 1 wrap around
+					if (board[board.size() - 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 2 wrap around
+					if (board[board.size() - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3 wrap around
+					if (board[board.size() - 1][0] == 'x') { aliveNeighbors++; }
+
+					// 4 
+					if (board[0][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 9 
+					if (board[0][0] == 'x') { aliveNeighbors++; }
+
+					// 6 
+					if (board[1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 7
+					if (board[1][col] == 'x') { aliveNeighbors++; }
+
+					// 8 wrap around
+					if (board[1][0] == 'x') { aliveNeighbors++; }
+				}
+
+				// case for cell "X" is on the left bottom corner
+				else if (row == board.size() - 1 && col == 0)
+				{
+					// 1 wrap around
+					if (board[row - 1][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 2 
+					if (board[row - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3 
+					if (board[row - 1][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 4 wrap around
+					if (board[row][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 9 
+					if (board[row][col + 1] == 'x') { aliveNeighbors++; }
+
+					// 6 wrap around
+					if (board[0][colSize - 1] == 'x') { aliveNeighbors++; }
+
+					// 7 wrap around
+					if (board[0][0] == 'x') { aliveNeighbors++; }
+
+					// 8 wrap around
+					if (board[0][1] == 'x') { aliveNeighbors++; }
+				}
+				
+				// case for cell "X" is on the right bottom corner
+				else if (row == board.size() - 1 && col == colSize - 1)
+				{
+					// 1 
+					if (board[row - 1][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 2 
+					if (board[row - 1][col] == 'x') { aliveNeighbors++; }
+
+					// 3 wrap around
+					if (board[row - 1][0] == 'x') { aliveNeighbors++; }
+
+					// 4 
+					if (board[row][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 9 wrap around
+					if (board[row][0] == 'x') { aliveNeighbors++; }
+
+					// 6 wrap around
+					if (board[0][col - 1] == 'x') { aliveNeighbors++; }
+
+					// 7 wrap around
+					if (board[0][col] == 'x') { aliveNeighbors++; }
+
+					// 8 wrap around
+					if (board[0][0] == 'x') { aliveNeighbors++; }
+				}
+
+				// Rule 1
+				if (board[row][col] == '.' && aliveNeighbors == 3) { nextBoard[row][col] = 'x';}
+
+				// Rule 2
+				if ((board[row][col] == 'x' && aliveNeighbors == 2) || (board[row][col] == 'x' && aliveNeighbors == 3)) { nextBoard[row][col] = 'x'; }
+
+				// Rule 3 & 4
+				if ((board[row][col] == 'x' && aliveNeighbors < 2) || (board[row][col] == 'x' && aliveNeighbors > 3)) { nextBoard[row][col] = '.'; }
+				
+				//cout << nextBoard[i][j];
+			}
+			//cout << "\n";
+		}
 		board = nextBoard;
 	}
 	return board;
